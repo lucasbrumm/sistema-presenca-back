@@ -1,33 +1,41 @@
-import { Router, RequestHandler } from 'express';
+import { Router, Request, Response } from 'express';
 import { NotificationController } from '../controllers/NotificationController';
 
 const router = Router();
 const notificationController = new NotificationController();
 
-const createNotification: RequestHandler = async (req, res) => {
+// Rotas existentes
+router.post('/notifications', async (req: Request, res: Response) => {
   await notificationController.create(req, res);
-};
+});
 
-const getUserNotifications: RequestHandler = async (req, res) => {
+router.get('/notifications/user/:userId', async (req: Request, res: Response) => {
   await notificationController.getUserNotifications(req, res);
-};
+});
 
-const markAsRead: RequestHandler = async (req, res) => {
+router.patch('/notifications/:id/read', async (req: Request, res: Response) => {
   await notificationController.markAsRead(req, res);
-};
+});
 
-const markAllAsRead: RequestHandler = async (req, res) => {
+router.patch('/notifications/user/:userId/read-all', async (req: Request, res: Response) => {
   await notificationController.markAllAsRead(req, res);
-};
+});
 
-const deleteNotification: RequestHandler = async (req, res) => {
+router.delete('/notifications/:id', async (req: Request, res: Response) => {
   await notificationController.delete(req, res);
-};
+});
 
-router.post('/notifications', createNotification);
-router.get('/notifications/user/:userId', getUserNotifications);
-router.put('/notifications/:id/read', markAsRead);
-router.put('/notifications/user/:userId/read-all', markAllAsRead);
-router.delete('/notifications/:id', deleteNotification);
+// Novas rotas
+router.post('/notifications/event/:eventId/remind', async (req: Request, res: Response) => {
+  await notificationController.sendEventReminder(req, res);
+});
+
+router.post('/notifications/attendance/confirm', async (req: Request, res: Response) => {
+  await notificationController.sendAttendanceConfirmation(req, res);
+});
+
+router.post('/notifications/event/:eventId/update', async (req: Request, res: Response) => {
+  await notificationController.sendUpdateNotification(req, res);
+});
 
 export default router;
