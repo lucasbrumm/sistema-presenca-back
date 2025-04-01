@@ -1,5 +1,7 @@
 import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
+import { connectDB } from './config/database';
+import userRouter from './routes/user.routes';
 
 class App {
   public app: Express;
@@ -7,9 +9,14 @@ class App {
 
   constructor() {
     this.app = express();
-    this.port = 3000;
+    this.port = Number(process.env.PORT) || 3000;
+    this.initializeDatabase();
     this.middlewares();
     this.routes();
+  }
+
+  private async initializeDatabase(): Promise<void> {
+    await connectDB();
   }
 
   private middlewares(): void {
@@ -21,6 +28,9 @@ class App {
     this.app.get('/', (req: Request, res: Response) => {
       res.json({ message: 'API is running!' });
     });
+
+    // Rotas do usuário
+    this.app.use('/api', userRouter);
   }
 
   public start(): void {
