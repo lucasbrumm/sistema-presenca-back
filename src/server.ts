@@ -4,6 +4,7 @@ import { connectDB } from './config/database';
 import userRouter from './routes/user.routes';
 import eventRouter from './routes/event.routes';
 import attendanceRouter from './routes/attendance.routes';
+import notificationRouter from './routes/notification.routes';
 
 class App {
   public app: Express;
@@ -37,6 +38,8 @@ class App {
     this.app.use('/api', eventRouter);
     // Rotas de presença
     this.app.use('/api', attendanceRouter);
+    // Rotas de notificação
+    this.app.use('/api', notificationRouter);
   }
 
   public start(): void {
