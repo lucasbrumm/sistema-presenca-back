@@ -5,7 +5,6 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export const connectDB = async (): Promise<void> => {
-  console.log("tentando?");
   try {
     const mongoURI = process.env.MONGO_URI;
     

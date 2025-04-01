@@ -1,0 +1,68 @@
+{
+  "client": "Thunder Client",
+  "collectionName": "Event API",
+  "dateExported": "2025-04-01T20:00:44.000Z",
+  "version": "1.1",
+  "folders": [],
+  "requests": [
+    {
+      "name": "Create Event",
+      "method": "POST",
+      "url": "http://localhost:3000/api/events",
+      "contentType": "application/json",
+      "body": {
+        "title": "Aula de Dev Web II",
+        "description": "Aula sobre APIs REST",
+        "startDate": "2025-04-02T10:00:00Z",
+        "endDate": "2025-04-02T12:00:00Z",
+        "location": "Sala 302",
+        "maxParticipants": 30,
+        "type": "class",
+        "category": "BSI"
+      }
+    },
+    {
+      "name": "Get All Events",
+      "method": "GET",
+      "url": "http://localhost:3000/api/events"
+    },
+    {
+      "name": "Get Event by ID",
+      "method": "GET",
+      "url": "http://localhost:3000/api/events/{{eventId}}"
+    },
+    {
+      "name": "Update Event",
+      "method": "PUT",
+      "url": "http://localhost:3000/api/events/{{eventId}}",
+      "contentType": "application/json",
+      "body": {
+        "title": "Aula de Dev Web II - Atualizada",
+        "description": "Aula sobre APIs REST e MongoDB"
+      }
+    },
+    {
+      "name": "Delete Event",
+      "method": "DELETE",
+      "url": "http://localhost:3000/api/events/{{eventId}}"
+    },
+    {
+      "name": "Register for Event",
+      "method": "POST",
+      "url": "http://localhost:3000/api/events/{{eventId}}/register",
+      "contentType": "application/json",
+      "body": {
+        "userId": "{{userId}}"
+      }
+    },
+    {
+      "name": "Update Attendee Status",
+      "method": "PUT",
+      "url": "http://localhost:3000/api/events/{{eventId}}/attendees/{{userId}}",
+      "contentType": "application/json",
+      "body": {
+        "status": "confirmed"
+      }
+    }
+  ]
+}

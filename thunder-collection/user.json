@@ -1,0 +1,33 @@
+{
+  "client": "Thunder Client",
+  "collectionName": "User API",
+  "dateExported": "2025-04-01T20:00:44.000Z",
+  "version": "1.1",
+  "folders": [],
+  "requests": [
+    {
+      "name": "Create User",
+      "method": "POST",
+      "url": "http://localhost:3000/api/users",
+      "contentType": "application/json",
+      "body": {
+        "name": "John Doe",
+        "email": "john@example.com",
+        "password": "123456",
+        "course": "BSI",
+        "registration": "12345",
+        "role": "student"
+      }
+    },
+    {
+      "name": "Get All Users",
+      "method": "GET",
+      "url": "http://localhost:3000/api/users"
+    },
+    {
+      "name": "Get User by ID",
+      "method": "GET",
+      "url": "http://localhost:3000/api/users/{{userId}}"
+    }
+  ]
+}

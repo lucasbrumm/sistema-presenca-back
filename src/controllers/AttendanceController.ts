@@ -12,31 +12,28 @@ interface MongoError extends Error {
 export class AttendanceController {
   public checkIn = async (req: Request, res: Response): Promise<Response> => {
     try {
-      const { eventId, userId, checkInMethod, location, deviceInfo } = req.body;
+      const { eventId, userId: userIdStr, checkInMethod, location, deviceInfo } = req.body;
+      // Convertendo o ID do usuário para ObjectId
+      const userId = Types.ObjectId.createFromHexString(userIdStr);
 
-      // Verify if the event exists and is ongoing
+      // Verificar se o evento existe e está ativo
       const event = await Event.findById(eventId);
       if (!event) {
         return res.status(404).json({ error: 'Event not found' });
       }
 
       const now = new Date();
-      console.log('now :>> ', formatEventDate(now));
-      console.log('event.startDate :>> ', formatEventDate(event.startDate));
-      console.log('event.endDate :>> ', formatEventDate(event.endDate));
-      
       if (now < event.startDate || now > event.endDate) {
         return res.status(400).json({ error: 'Event is not currently active' });
       }
 
-      // Verify if user is registered for the event
-      const attendee = event.attendees.find(a => a.userId.equals(new Types.ObjectId(userId)));
-      console.log('attendee :>> ', attendee);
+      // Verificar se o usuário está registrado no evento
+      const attendee = event.attendees.find(a => a.userId.equals(userId));
       if (!attendee) {
         return res.status(400).json({ error: 'User is not registered for this event' });
       }
 
-      // Create attendance record
+      // Criar registro de presença
       const attendance = await Attendance.create({
         eventId,
         userId,
@@ -47,7 +44,7 @@ export class AttendanceController {
         synced: true,
       });
 
-      // Update attendee status to attended
+      // Atualizar o status do participante para "presente"
       attendee.status = AttendeeStatus.ATTENDED;
       await event.save();
 
@@ -92,6 +89,9 @@ export class AttendanceController {
   public syncOfflineAttendance = async (req: Request, res: Response): Promise<Response> => {
     try {
       const attendances = req.body.attendances;
+      if (!attendances || !Array.isArray(attendances)) {
+        return res.status(400).json({ error: 'Invalid attendance data' });
+      }
       const results = await Promise.all(
         attendances.map(async (attendance: any) => {
           try {
@@ -105,14 +105,15 @@ export class AttendanceController {
               return { ...attendance, error: 'Check-in time outside event window' };
             }
 
+            const userId = Types.ObjectId.createFromHexString(attendance.userId);
             const saved = await Attendance.create({
               ...attendance,
+              userId,
               synced: true
             });
 
-            // Update event attendee status
             const attendee = event.attendees.find(a => 
-              a.userId.equals(new Types.ObjectId(attendance.userId))
+              a.userId.equals(attendance.userId)
             );
             if (attendee) {
               attendee.status = AttendeeStatus.ATTENDED;
