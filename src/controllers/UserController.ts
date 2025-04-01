@@ -7,7 +7,8 @@ export class UserController {
       const user: IUser = await User.create(req.body);
       return res.status(201).json(user);
     } catch (error) {
-      return res.status(400).json({ error: 'Error creating user' });
+      console.error('Error creating user:', error);
+      return res.status(400).json({ error: error instanceof Error ? error.message : 'Error creating user' });
     }
   }
 

@@ -9,7 +9,6 @@ const createUser: RequestHandler = async (req, res) => {
 };
 
 const getAllUsers: RequestHandler = async (req, res) => {
-    console.log("aq?");
   await userController.findAll(req, res);
 };
 
