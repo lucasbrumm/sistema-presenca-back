@@ -1,19 +1,15 @@
 import { Schema, model, Document, Types } from 'mongoose';
-import { CheckInMethod } from '../enums/CheckInMethod';
-
-interface ILocation {
-  lat: number;
-  lng: number;
-}
+import { AttendanceStatus } from '../enums/AttendanceStatus';
 
 export interface IAttendance extends Document {
   eventId: Types.ObjectId;
   userId: Types.ObjectId;
-  checkInMethod: CheckInMethod;
-  checkInTime: Date;
-  location: ILocation;
-  deviceInfo: Record<string, any>;
-  synced: boolean;
+  status: AttendanceStatus;
+  verificationCode?: string;
+  verifiedAt?: Date;
+  notes?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const attendanceSchema = new Schema({
@@ -27,37 +23,28 @@ const attendanceSchema = new Schema({
     ref: 'User',
     required: true,
   },
-  checkInMethod: {
+  status: {
     type: String,
-    enum: Object.values(CheckInMethod),
+    enum: Object.values(AttendanceStatus),
     required: true,
   },
-  checkInTime: {
+  verificationCode: {
+    type: String,
+  },
+  verifiedAt: {
     type: Date,
-    default: Date.now,
-    required: true,
   },
-  location: {
-    lat: {
-      type: Number,
-      required: true,
-    },
-    lng: {
-      type: Number,
-      required: true,
-    },
+  notes: {
+    type: String,
   },
-  deviceInfo: {
-    type: Schema.Types.Mixed,
-    required: true,
-  },
-  synced: {
-    type: Boolean,
-    default: false,
-  },
+}, {
+  timestamps: true,
 });
 
-// para previnir check-ins duplicados
+// Índices para melhorar performance das consultas
 attendanceSchema.index({ eventId: 1, userId: 1 }, { unique: true });
+attendanceSchema.index({ verificationCode: 1 }, { unique: true, sparse: true });
+attendanceSchema.index({ eventId: 1, status: 1 });
+attendanceSchema.index({ userId: 1, status: 1 });
 
 export const Attendance = model<IAttendance>('Attendance', attendanceSchema);

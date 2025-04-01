@@ -1,29 +1,32 @@
-import { Router, RequestHandler } from 'express';
+import { Router, Request, Response } from 'express';
 import { AttendanceController } from '../controllers/AttendanceController';
 
 const router = Router();
 const attendanceController = new AttendanceController();
 
-const checkIn: RequestHandler = async (req, res) => {
-  await attendanceController.checkIn(req, res);
-};
-
-const getEventAttendance: RequestHandler = async (req, res) => {
-  await attendanceController.getEventAttendance(req, res);
-};
-
-const getUserAttendance: RequestHandler = async (req, res) => {
-  await attendanceController.getUserAttendance(req, res);
-};
-
-const syncOfflineAttendance: RequestHandler = async (req, res) => {
-  await attendanceController.syncOfflineAttendance(req, res);
-};
-
 // Routes
-router.post('/attendance/check-in', checkIn);
-router.get('/attendance/event/:eventId', getEventAttendance);
-router.get('/attendance/user/:userId', getUserAttendance);
-router.post('/attendance/sync', syncOfflineAttendance);
+router.post('/attendance/mark', async (req: Request, res: Response) => {
+  await attendanceController.markAttendance(req, res);
+});
+
+router.post('/attendance/verify', async (req: Request, res: Response) => {
+  await attendanceController.verifyAttendance(req, res);
+});
+
+router.post('/attendance/sync/:eventId', async (req: Request, res: Response) => {
+  await attendanceController.syncAttendance(req, res);
+});
+
+router.get('/attendance/event/:eventId', async (req: Request, res: Response) => {
+  await attendanceController.getEventAttendance(req, res);
+});
+
+router.get('/attendance/user/:userId', async (req: Request, res: Response) => {
+  await attendanceController.getUserAttendance(req, res);
+});
+
+router.get('/attendance/report/:eventId', async (req: Request, res: Response) => {
+  await attendanceController.generateReport(req, res);
+});
 
 export default router;
