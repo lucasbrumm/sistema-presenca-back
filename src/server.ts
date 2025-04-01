@@ -2,6 +2,8 @@ import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
 import { connectDB } from './config/database';
 import userRouter from './routes/user.routes';
+import eventRouter from './routes/event.routes';
+import attendanceRouter from './routes/attendance.routes';
 
 class App {
   public app: Express;
@@ -31,6 +33,10 @@ class App {
 
     // Rotas do usuário
     this.app.use('/api', userRouter);
+    // Rotas de eventos
+    this.app.use('/api', eventRouter);
+    // Rotas de presença
+    this.app.use('/api', attendanceRouter);
   }
 
   public start(): void {
