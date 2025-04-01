@@ -1,145 +1,107 @@
 import { Request, Response } from 'express';
-import { Event, IEvent } from '../models/Event';
 import { Types } from 'mongoose';
-import { AttendeeStatus } from '../enums/AttendeeStatus';
+import { EventService } from '../services/EventService';
 
 export class EventController {
-  public create = async (req: Request, res: Response): Promise<Response> => {
+  private eventService: EventService;
+
+  constructor() {
+    this.eventService = new EventService();
+  }
+
+  public createEvent = async (req: Request, res: Response): Promise<Response> => {
     try {
-      const event: IEvent = await Event.create({
+      const event = await this.eventService.createEvent({
         ...req.body,
-        qrCodeData: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}` // Simple QR code data generation
+        createdBy: Types.ObjectId.createFromHexString(req.body.createdBy)
       });
       return res.status(201).json(event);
     } catch (error) {
       console.error('Error creating event:', error);
       return res.status(400).json({ error: error instanceof Error ? error.message : 'Error creating event' });
     }
-  }
+  };
 
-  public findAll = async (req: Request, res: Response): Promise<Response> => {
+  public updateEvent = async (req: Request, res: Response): Promise<Response> => {
     try {
-      const events: IEvent[] = await Event.find()
-        .populate('createdBy', 'name email')
-        .populate('attendees.userId', 'name email');
-      return res.json(events);
-    } catch (error) {
-      console.error('Error fetching events:', error);
-      return res.status(500).json({ error: 'Error fetching events' });
-    }
-  }
-
-  public findById = async (req: Request, res: Response): Promise<Response> => {
-    try {
-      const event: IEvent | null = await Event.findById(req.params.id)
-        .populate('createdBy', 'name email')
-        .populate('attendees.userId', 'name email');
-      
-      if (!event) {
-        return res.status(404).json({ error: 'Event not found' });
-      }
-      
-      return res.json(event);
-    } catch (error) {
-      console.error('Error fetching event:', error);
-      return res.status(500).json({ error: 'Error fetching event' });
-    }
-  }
-
-  public update = async (req: Request, res: Response): Promise<Response> => {
-    try {
-      const event: IEvent | null = await Event.findByIdAndUpdate(
-        req.params.id,
-        req.body,
-        { new: true, runValidators: true }
-      );
-
-      if (!event) {
-        return res.status(404).json({ error: 'Event not found' });
-      }
-
+      const event = await this.eventService.updateEvent(req.params.id, req.body);
       return res.json(event);
     } catch (error) {
       console.error('Error updating event:', error);
       return res.status(400).json({ error: error instanceof Error ? error.message : 'Error updating event' });
     }
-  }
+  };
 
-  public delete = async (req: Request, res: Response): Promise<Response> => {
+  public deleteEvent = async (req: Request, res: Response): Promise<Response> => {
     try {
-      const event: IEvent | null = await Event.findByIdAndDelete(req.params.id);
-      
-      if (!event) {
-        return res.status(404).json({ error: 'Event not found' });
-      }
-
-      return res.status(204).send();
+      const result = await this.eventService.deleteEvent(req.params.id);
+      return res.json(result);
     } catch (error) {
       console.error('Error deleting event:', error);
-      return res.status(500).json({ error: 'Error deleting event' });
+      return res.status(400).json({ error: error instanceof Error ? error.message : 'Error deleting event' });
     }
-  }
+  };
 
-  public register = async (req: Request, res: Response): Promise<Response> => {
+  public getEventById = async (req: Request, res: Response): Promise<Response> => {
     try {
-      const event = await Event.findById(req.params.id);
-      if (!event) {
-        return res.status(404).json({ error: 'Event not found' });
-      }
+      const event = await this.eventService.getEventById(req.params.id);
+      return res.json(event);
+    } catch (error) {
+      console.error('Error fetching event:', error);
+      return res.status(404).json({ error: error instanceof Error ? error.message : 'Event not found' });
+    }
+  };
 
-      const userId = new Types.ObjectId(req.body.userId);
-      
-      // Check if user is already registered
-      if (event.attendees.some(a => a.userId.equals(userId))) {
-        return res.status(400).json({ error: 'User already registered' });
-      }
+  public getAllEvents = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      const events = await this.eventService.getAllEvents();
+      return res.json(events);
+    } catch (error) {
+      console.error('Error fetching events:', error);
+      return res.status(400).json({ error: 'Error fetching events' });
+    }
+  };
 
-      // Check if event is full
-      if (event.attendees.length >= event.maxParticipants) {
-        // Add to waiting list
-        event.waitingList.push({
-          userId,
-          registeredAt: new Date()
-        });
-        await event.save();
-        return res.status(200).json({ message: 'Added to waiting list' });
-      }
+  public getEventsByCreator = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      const events = await this.eventService.getEventsByCreator(req.params.creatorId);
+      return res.json(events);
+    } catch (error) {
+      console.error('Error fetching events:', error);
+      return res.status(400).json({ error: 'Error fetching events' });
+    }
+  };
 
-      // Register user
-      event.attendees.push({
-        userId,
-        status: AttendeeStatus.REGISTERED
+  public registerForEvent = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      const event = await this.eventService.registerForEvent({
+        userId: Types.ObjectId.createFromHexString(req.body.userId),
+        eventId: Types.ObjectId.createFromHexString(req.params.id)
       });
-      
-      await event.save();
-      return res.status(200).json({ message: 'Successfully registered' });
+      return res.json(event);
     } catch (error) {
       console.error('Error registering for event:', error);
       return res.status(400).json({ error: error instanceof Error ? error.message : 'Error registering for event' });
     }
-  }
+  };
 
-  public updateAttendeeStatus = async (req: Request, res: Response): Promise<Response> => {
+  public generateQRCode = async (req: Request, res: Response): Promise<Response> => {
     try {
-      const { eventId, userId, status } = req.body;
-      
-      const event = await Event.findById(eventId);
-      if (!event) {
-        return res.status(404).json({ error: 'Event not found' });
-      }
-
-      const attendee = event.attendees.find(a => a.userId.equals(new Types.ObjectId(userId)));
-      if (!attendee) {
-        return res.status(404).json({ error: 'Attendee not found' });
-      }
-
-      attendee.status = status;
-      await event.save();
-
-      return res.status(200).json({ message: 'Status updated successfully' });
+      const qrCode = await this.eventService.generateQRCode(req.params.id);
+      return res.json(qrCode);
     } catch (error) {
-      console.error('Error updating attendee status:', error);
-      return res.status(400).json({ error: error instanceof Error ? error.message : 'Error updating attendee status' });
+      console.error('Error generating QR code:', error);
+      return res.status(400).json({ error: error instanceof Error ? error.message : 'Error generating QR code' });
     }
-  }
+  };
+
+  public getAttendees = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      const attendees = await this.eventService.getAttendees(req.params.id);
+      return res.json(attendees);
+    } catch (error) {
+      console.error('Error fetching attendees:', error);
+      return res.status(400).json({ error: error instanceof Error ? error.message : 'Error fetching attendees' });
+    }
+  };
 }
