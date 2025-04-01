@@ -6,17 +6,42 @@
   "folders": [],
   "requests": [
     {
-      "name": "Create User",
+      "name": "Register",
       "method": "POST",
-      "url": "http://localhost:3000/api/users",
+      "url": "http://localhost:3000/api/auth/register",
       "contentType": "application/json",
       "body": {
         "name": "John Doe",
         "email": "john@example.com",
         "password": "123456",
-        "course": "BSI",
-        "registration": "12345",
+        "course": "Computer Science",
+        "registration": "20230001",
         "role": "student"
+      }
+    },
+    {
+      "name": "Login",
+      "method": "POST",
+      "url": "http://localhost:3000/api/auth/login",
+      "contentType": "application/json",
+      "body": {
+        "email": "john@example.com",
+        "password": "123456"
+      }
+    },
+    {
+      "name": "Get User Profile",
+      "method": "GET",
+      "url": "http://localhost:3000/api/users/profile/{{userId}}"
+    },
+    {
+      "name": "Update User Profile",
+      "method": "PUT",
+      "url": "http://localhost:3000/api/users/profile/{{userId}}",
+      "contentType": "application/json",
+      "body": {
+        "name": "John Updated",
+        "course": "Information Systems"
       }
     },
     {
@@ -25,9 +50,9 @@
       "url": "http://localhost:3000/api/users"
     },
     {
-      "name": "Get User by ID",
+      "name": "Get Users by Type",
       "method": "GET",
-      "url": "http://localhost:3000/api/users/{{userId}}"
+      "url": "http://localhost:3000/api/users/type/{{role}}"
     }
   ]
 }

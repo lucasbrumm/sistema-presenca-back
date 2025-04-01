@@ -4,20 +4,35 @@ import { UserController } from '../controllers/UserController';
 const router = Router();
 const userController = new UserController();
 
-const createUser: RequestHandler = async (req, res) => {
-  await userController.create(req, res);
+const register: RequestHandler = async (req, res) => {
+  await userController.register(req, res);
+};
+
+const login: RequestHandler = async (req, res) => {
+  await userController.login(req, res);
+};
+
+const getUserProfile: RequestHandler = async (req, res) => {
+  await userController.getUserProfile(req, res);
+};
+
+const updateUserProfile: RequestHandler = async (req, res) => {
+  await userController.updateUserProfile(req, res);
 };
 
 const getAllUsers: RequestHandler = async (req, res) => {
-  await userController.findAll(req, res);
+  await userController.getAllUsers(req, res);
 };
 
-const getUserById: RequestHandler = async (req, res) => {
-  await userController.findById(req, res);
+const getUsersByType: RequestHandler = async (req, res) => {
+  await userController.getUsersByType(req, res);
 };
 
-router.post('/users', createUser);
+router.post('/auth/register', register);
+router.post('/auth/login', login);
+router.get('/users/profile/:id', getUserProfile);
+router.put('/users/profile/:id', updateUserProfile);
 router.get('/users', getAllUsers);
-router.get('/users/:id', getUserById);
+router.get('/users/type/:role', getUsersByType);
 
 export default router;
