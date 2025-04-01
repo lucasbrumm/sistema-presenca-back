@@ -1,16 +1,34 @@
-// Server.ts
+import express, { Express, Request, Response } from 'express';
+import cors from 'cors';
 
-import { Request, Response } from 'express'
+class App {
+  public app: Express;
+  public port: number;
 
-const express = require('express')
+  constructor() {
+    this.app = express();
+    this.port = 3000;
+    this.middlewares();
+    this.routes();
+  }
 
-const app = express()
+  private middlewares(): void {
+    this.app.use(express.json());
+    this.app.use(cors());
+  }
 
-app.get('/', (req: Request, res: Response) => {
-  res.json({
-    message: 'Hello World',
-  })
-})
-app.listen(3000, () => {
-  console.log('Server is running on port 3000')
-})
+  private routes(): void {
+    this.app.get('/', (req: Request, res: Response) => {
+      res.json({ message: 'API is running!' });
+    });
+  }
+
+  public start(): void {
+    this.app.listen(this.port, () => {
+      console.log(`Server is running on port ${this.port}`);
+    });
+  }
+}
+
+const server = new App();
+server.start();
