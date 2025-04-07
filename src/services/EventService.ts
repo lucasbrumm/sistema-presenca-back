@@ -14,9 +14,25 @@ export class EventService {
     this.notificationService = new NotificationService();
   }
 
+  private async generateUniqueQRCode(eventData: CreateEventDTO): Promise<string> {
+    const timestamp = Date.now();
+    const baseString = `${eventData.title}-${eventData.startDate}-${timestamp}`;
+    const qrCodeData = baseString.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    return qrCodeData;
+  }
+
   public async createEvent(eventData: CreateEventDTO) {
     try {
-      const event = await Event.create(eventData);
+      // Gerar QR code único
+      const qrCodeData = await this.generateUniqueQRCode(eventData);
+
+      // Adicionar o QR code aos dados do evento
+      const eventWithQR = {
+        ...eventData,
+        qrCodeData
+      };
+
+      const event = await Event.create(eventWithQR);
       return event;
     } catch (error) {
       throw error;
