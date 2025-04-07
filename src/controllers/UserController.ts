@@ -8,6 +8,18 @@ export class UserController {
     this.userService = new UserService();
   }
 
+  public async createUser(req: Request, res: Response): Promise<Response> {
+    try {
+      const user = await this.userService.createUser(req.body);
+      return res.status(201).json(user);
+    } catch (error) {
+      console.error('Erro ao criar usuário:', error);
+      return res.status(400).json({
+        error: error instanceof Error ? error.message : 'Erro ao criar usuário',
+      });
+    }
+  }
+
   public async loginWithFirebase(req: Request, res: Response): Promise<Response> {
     try {
       const { firebaseToken } = req.body;
@@ -18,7 +30,9 @@ export class UserController {
       return res.json(result);
     } catch (error) {
       console.error('Erro ao autenticar com Firebase:', error);
-      return res.status(401).json({ error: error instanceof Error ? error.message : 'Erro na autenticação' });
+      return res
+        .status(401)
+        .json({ error: error instanceof Error ? error.message : 'Erro na autenticação' });
     }
   }
 
@@ -31,7 +45,9 @@ export class UserController {
       return res.json(user);
     } catch (error) {
       console.error('Erro ao buscar perfil do usuário:', error);
-      return res.status(500).json({ error: error instanceof Error ? error.message : 'Erro ao obter perfil do usuário' });
+      return res.status(500).json({
+        error: error instanceof Error ? error.message : 'Erro ao obter perfil do usuário',
+      });
     }
   }
 
@@ -41,9 +57,11 @@ export class UserController {
       return res.json(user);
     } catch (error) {
       console.error('Error updating user profile:', error);
-      return res.status(400).json({ error: error instanceof Error ? error.message : 'Error updating user' });
+      return res
+        .status(400)
+        .json({ error: error instanceof Error ? error.message : 'Error updating user' });
     }
-  };
+  }
 
   public getAllUsers = async (req: Request, res: Response): Promise<Response> => {
     try {

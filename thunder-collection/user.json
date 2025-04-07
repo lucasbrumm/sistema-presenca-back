@@ -8,46 +8,64 @@
     {
       "name": "Register",
       "method": "POST",
-      "url": "http://localhost:3000/api/auth/register",
+      "url": "http://localhost:3000/api/register",
       "contentType": "application/json",
+      "description": "Cria um novo usuário no Firebase e no banco de dados",
       "body": {
         "name": "John Doe",
         "email": "john@example.com",
         "password": "123456",
-        "course": "Computer Science",
+        "course": "Sistemas de Informação",
         "registration": "20230001",
-        "role": "student"
+        "role": "aluno"
       }
     },
     {
-      "name": "Login",
+      "name": "Login com Firebase",
       "method": "POST",
-      "url": "http://localhost:3000/api/auth/login",
+      "url": "http://localhost:3000/api/auth/firebase",
       "contentType": "application/json",
+      "description": "Autentica o usuário usando o token do Firebase",
       "body": {
-        "email": "john@example.com",
-        "password": "123456"
-      }
+        "firebaseToken": "token_do_firebase_aqui"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ]
     },
     {
       "name": "Get User Profile",
       "method": "GET",
-      "url": "http://localhost:3000/api/users/profile/{{userId}}"
+      "url": "http://localhost:3000/api/profile",
+      "description": "Obtém o perfil do usuário autenticado",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{token}}"
+        }
+      ]
     },
     {
       "name": "Update User Profile",
       "method": "PUT",
-      "url": "http://localhost:3000/api/users/profile/{{userId}}",
+      "url": "http://localhost:3000/api/profile",
       "contentType": "application/json",
+      "description": "Atualiza o perfil do usuário autenticado",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{token}}"
+        }
+      ],
       "body": {
         "name": "John Updated",
-        "course": "Information Systems"
+        "course": "Sistemas de Informação",
+        "registration": "20230001",
+        "role": "aluno"
       }
-    },
-    {
-      "name": "Get All Users",
-      "method": "GET",
-      "url": "http://localhost:3000/api/users"
     },
     {
       "name": "Get Users by Type",

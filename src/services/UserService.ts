@@ -2,16 +2,43 @@ import jwt from 'jsonwebtoken';
 import { User } from '../models/User';
 import { auth } from '../config/firebase.admin';
 import { UpdateUserDTO } from '../dtos/user.dto';
+import { CreateUserDTO } from '../dtos/user.dto';
 
 export class UserService {
+  public async createUser(userData: CreateUserDTO) {
+    try {
+      // Criar usuário no Firebase primeiro
+      const firebaseUser = await auth.createUser({
+        email: userData.email,
+        password: userData.password,
+        displayName: userData.name,
+      });
+
+      // Criar usuário no banco de dados com o UUID do Firebase
+      const user = await User.create({
+        email: userData.email,
+        firebaseUid: firebaseUser.uid,
+        name: userData.name,
+        role: userData.role || 'ALUNO',
+        course: userData.course || 'Não definido',
+        registration: userData.registration,
+      });
+
+      return user;
+    } catch (error: unknown) {
+      console.error('Erro na criação do usuário:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      throw new Error('Falha ao criar usuário: ' + errorMessage);
+    }
+  }
   public async loginWithFirebase(firebaseToken: string) {
     try {
       // Verifica o token do Firebase
       const decodedToken = await auth.verifyIdToken(firebaseToken);
-      
+
       // Procura o usuário no banco de dados
       let user = await User.findOne({ firebaseUid: decodedToken.uid });
-      
+
       // Se o usuário não existir, cria um novo
       if (!user) {
         user = await User.create({
@@ -20,20 +47,23 @@ export class UserService {
           name: decodedToken.name || 'Usuário',
           role: 'ALUNO',
           course: 'Não definido',
-          registration: `FB-${Date.now()}` // Gera um número de registro temporário
+          registration: `FB-${Date.now()}`, // Gera um número de registro temporário
         });
       }
 
       // Gera o token JWT do backend
       const token = jwt.sign(
-        { 
+        {
           userId: user._id,
           firebaseUid: decodedToken.uid,
           email: user.email,
-          role: user.role
+          role: user.role,
         },
-        process.env.JWT_SECRET || (() => { throw new Error('JWT_SECRET não está definido no ambiente'); })(),
-        { expiresIn: '24h' }
+        process.env.JWT_SECRET ||
+          (() => {
+            throw new Error('JWT_SECRET não está definido no ambiente');
+          })(),
+        { expiresIn: '24h' },
       );
 
       return { user, token };
@@ -47,7 +77,7 @@ export class UserService {
   public async getUserProfile(firebaseUid: string) {
     try {
       const user = await User.findOne({ firebaseUid });
-      
+
       if (!user) {
         throw new Error('Usuário não encontrado');
       }
@@ -61,11 +91,9 @@ export class UserService {
   }
   public async updateUserProfile(userId: string, updateData: UpdateUserDTO) {
     try {
-      const user = await User.findByIdAndUpdate(
-        userId,
-        { $set: updateData },
-        { new: true }
-      ).select('-password');
+      const user = await User.findByIdAndUpdate(userId, { $set: updateData }, { new: true }).select(
+        '-password',
+      );
 
       if (!user) {
         throw new Error('User not found');

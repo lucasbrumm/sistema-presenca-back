@@ -15,9 +15,10 @@ declare global {
 export const verifyFirebaseToken = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void | Response> => {
   try {
+    console.log('aq?');
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
