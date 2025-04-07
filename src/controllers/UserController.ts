@@ -8,24 +8,30 @@ export class UserController {
     this.userService = new UserService();
   }
 
-  public async loginWithFirebase(firebaseToken: string) {
+  public async loginWithFirebase(req: Request, res: Response): Promise<Response> {
     try {
+      const { firebaseToken } = req.body;
       if (!firebaseToken) {
-        throw new Error('Token do Firebase não fornecido');
+        return res.status(400).json({ error: 'Token do Firebase não fornecido' });
       }
-      return await this.userService.loginWithFirebase(firebaseToken);
+      const result = await this.userService.loginWithFirebase(firebaseToken);
+      return res.json(result);
     } catch (error) {
       console.error('Erro ao autenticar com Firebase:', error);
-      throw error;
+      return res.status(401).json({ error: error instanceof Error ? error.message : 'Erro na autenticação' });
     }
   }
 
-  public async getUserProfile(firebaseUid: string) {
+  public async getUserProfile(req: Request, res: Response): Promise<Response> {
     try {
-      return await this.userService.getUserProfile(firebaseUid);
+      if (!req.user?.firebaseUid) {
+        return res.status(401).json({ error: 'Usuário não autenticado' });
+      }
+      const user = await this.userService.getUserProfile(req.user.firebaseUid);
+      return res.json(user);
     } catch (error) {
       console.error('Erro ao buscar perfil do usuário:', error);
-      throw error;
+      return res.status(500).json({ error: error instanceof Error ? error.message : 'Erro ao obter perfil do usuário' });
     }
   }
 
