@@ -8,37 +8,28 @@ export class UserController {
     this.userService = new UserService();
   }
 
-  public register = async (req: Request, res: Response): Promise<Response> => {
+  public async loginWithFirebase(firebaseToken: string) {
     try {
-      const result = await this.userService.register(req.body);
-      return res.status(201).json(result);
+      if (!firebaseToken) {
+        throw new Error('Token do Firebase não fornecido');
+      }
+      return await this.userService.loginWithFirebase(firebaseToken);
     } catch (error) {
-      console.error('Error registering user:', error);
-      return res.status(400).json({ error: error instanceof Error ? error.message : 'Error registering user' });
+      console.error('Erro ao autenticar com Firebase:', error);
+      throw error;
     }
-  };
+  }
 
-  public login = async (req: Request, res: Response): Promise<Response> => {
+  public async getUserProfile(firebaseUid: string) {
     try {
-      const result = await this.userService.login(req.body);
-      return res.json(result);
+      return await this.userService.getUserProfile(firebaseUid);
     } catch (error) {
-      console.error('Error logging in:', error);
-      return res.status(401).json({ error: error instanceof Error ? error.message : 'Invalid credentials' });
+      console.error('Erro ao buscar perfil do usuário:', error);
+      throw error;
     }
-  };
+  }
 
-  public getUserProfile = async (req: Request, res: Response): Promise<Response> => {
-    try {
-      const user = await this.userService.getUserProfile(req.params.id);
-      return res.json(user);
-    } catch (error) {
-      console.error('Error fetching user profile:', error);
-      return res.status(404).json({ error: error instanceof Error ? error.message : 'User not found' });
-    }
-  };
-
-  public updateUserProfile = async (req: Request, res: Response): Promise<Response> => {
+  public async updateUserProfile(req: Request, res: Response): Promise<Response> {
     try {
       const user = await this.userService.updateUserProfile(req.params.id, req.body);
       return res.json(user);

@@ -1,38 +1,46 @@
-import { Router, RequestHandler } from 'express';
+import { Router, Request, Response, NextFunction, RequestHandler } from 'express';
 import { UserController } from '../controllers/UserController';
+import { verifyFirebaseToken } from '../middleware/firebaseAuth';
 
 const router = Router();
 const userController = new UserController();
 
-const register: RequestHandler = async (req, res) => {
-  await userController.register(req, res);
-};
+// Rota de autenticação com Firebase
+router.post('/auth/firebase', ((req: Request, res: Response) => {
+  (async () => {
+    try {
+      if (!req.body.firebaseToken) {
+        res.status(400).json({ error: 'Token do Firebase não fornecido' });
+        return;
+      }
+      const result = await userController.loginWithFirebase(req.body.firebaseToken);
+      res.json(result);
+    } catch (error) {
+      console.error('Erro ao autenticar:', error);
+      res.status(401).json({ error: error instanceof Error ? error.message : 'Erro na autenticação' });
+    }
+  })();
+}) as RequestHandler);
 
-const login: RequestHandler = async (req, res) => {
-  await userController.login(req, res);
-};
+// Rotas protegidas que requerem autenticação
+router.use(verifyFirebaseToken);
 
-const getUserProfile: RequestHandler = async (req, res) => {
-  await userController.getUserProfile(req, res);
-};
+// Rota para obter perfil do usuário autenticado
+router.get('/profile', (async (req: Request, res: Response) => {
+  (async () => {
+    try {
+      if (!req.user?.firebaseUid) {
+        res.status(401).json({ error: 'Usuário não autenticado' });
+        return;
+      }
 
-const updateUserProfile: RequestHandler = async (req, res) => {
-  await userController.updateUserProfile(req, res);
-};
-
-const getAllUsers: RequestHandler = async (req, res) => {
-  await userController.getAllUsers(req, res);
-};
-
-const getUsersByType: RequestHandler = async (req, res) => {
-  await userController.getUsersByType(req, res);
-};
-
-router.post('/auth/register', register);
-router.post('/auth/login', login);
-router.get('/users/profile/:id', getUserProfile);
-router.put('/users/profile/:id', updateUserProfile);
-router.get('/users', getAllUsers);
-router.get('/users/type/:role', getUsersByType);
+      const user = await userController.getUserProfile(req.user.firebaseUid);
+      res.json(user);
+    } catch (error) {
+      console.error('Erro ao obter perfil:', error);
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Erro ao obter perfil do usuário' });
+    }
+  })();
+}) as RequestHandler);
 
 export default router;

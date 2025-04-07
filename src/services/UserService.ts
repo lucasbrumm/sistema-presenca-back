@@ -1,82 +1,64 @@
-import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { User } from '../models/User';
-import { RegisterUserDTO, LoginDTO, UpdateUserDTO } from '../interfaces/user.interface';
+import { auth } from '../config/firebase.admin';
+import { UpdateUserDTO } from '../dtos/user.dto';
 
 export class UserService {
-  public async register(userData: RegisterUserDTO) {
+  public async loginWithFirebase(firebaseToken: string) {
     try {
-      // Verificar se o email já existe
-      const existingUser = await User.findOne({ email: userData.email });
-      if (existingUser) {
-        throw new Error('Email already registered');
+      // Verifica o token do Firebase
+      const decodedToken = await auth.verifyIdToken(firebaseToken);
+      
+      // Procura o usuário no banco de dados
+      let user = await User.findOne({ firebaseUid: decodedToken.uid });
+      
+      // Se o usuário não existir, cria um novo
+      if (!user) {
+        user = await User.create({
+          email: decodedToken.email,
+          firebaseUid: decodedToken.uid,
+          name: decodedToken.name || 'Usuário',
+          role: 'ALUNO',
+          course: 'Não definido',
+          registration: `FB-${Date.now()}` // Gera um número de registro temporário
+        });
       }
 
-      // Hash da senha
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(userData.password, salt);
-
-      // Criar usuário
-      const user = await User.create({
-        ...userData,
-        password: hashedPassword
-      });
-
-      // Gerar token JWT
+      // Gera o token JWT do backend
       const token = jwt.sign(
-        { userId: user._id },
-        process.env.JWT_SECRET || 'your-secret-key',
+        { 
+          userId: user._id,
+          firebaseUid: decodedToken.uid,
+          email: user.email,
+          role: user.role
+        },
+        process.env.JWT_SECRET || (() => { throw new Error('JWT_SECRET não está definido no ambiente'); })(),
         { expiresIn: '24h' }
       );
 
-      const { password, ...userWithoutPassword } = user.toObject();
-      return { ...userWithoutPassword, token };
-    } catch (error) {
-      throw error;
+      return { user, token };
+    } catch (error: unknown) {
+      console.error('Erro no login com Firebase:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      throw new Error('Falha na autenticação com Firebase: ' + errorMessage);
     }
   }
 
-  public async login(loginData: LoginDTO) {
+  public async getUserProfile(firebaseUid: string) {
     try {
-      // Buscar usuário pelo email
-      const user = await User.findOne({ email: loginData.email });
+      const user = await User.findOne({ firebaseUid });
+      
       if (!user) {
-        throw new Error('Invalid credentials');
+        throw new Error('Usuário não encontrado');
       }
 
-      // Verificar senha
-      const isValidPassword = await bcrypt.compare(loginData.password, user.password);
-      if (!isValidPassword) {
-        throw new Error('Invalid credentials');
-      }
-
-      // Gerar token JWT
-      const token = jwt.sign(
-        { userId: user._id },
-        process.env.JWT_SECRET || 'your-secret-key',
-        { expiresIn: '24h' }
-      );
-
-      // Retornar usuário sem a senha e com o token
-      const { password, ...userWithoutPassword } = user.toObject();
-      return { ...userWithoutPassword, token };
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  public async getUserProfile(userId: string) {
-    try {
-      const user = await User.findById(userId).select('-password');
-      if (!user) {
-        throw new Error('User not found');
-      }
       return user;
-    } catch (error) {
-      throw error;
+    } catch (error: unknown) {
+      console.error('Erro ao buscar perfil do usuário:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      throw new Error('Falha ao buscar perfil: ' + errorMessage);
     }
   }
-
   public async updateUserProfile(userId: string, updateData: UpdateUserDTO) {
     try {
       const user = await User.findByIdAndUpdate(
