@@ -28,11 +28,16 @@ const getUsersByType: RequestHandler = async (req, res) => {
   await userController.getUsersByType(req, res);
 };
 
+const deleteUser: RequestHandler = async (req, res) => {
+  await userController.deleteUser(req, res);
+};
+
 router.post('/auth/register', register);
 router.post('/auth/login', login);
 router.get('/users/profile/:id', getUserProfile);
 router.put('/users/profile/:id', updateUserProfile);
 router.get('/users', getAllUsers);
 router.get('/users/type/:role', getUsersByType);
+router.delete('/users/:id', deleteUser);
 
 export default router;

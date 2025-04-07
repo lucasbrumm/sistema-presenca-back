@@ -48,6 +48,16 @@ export class UserController {
     }
   };
 
+  public deleteUser = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      const result = await this.userService.deleteUser(req.params.id);
+      return res.json(result);
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      return res.status(404).json({ error: error instanceof Error ? error.message : 'Error deleting user' });
+    }
+  };
+
   public getAllUsers = async (req: Request, res: Response): Promise<Response> => {
     try {
       const users = await this.userService.getAllUsers();

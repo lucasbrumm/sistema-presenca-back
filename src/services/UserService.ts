@@ -110,4 +110,16 @@ export class UserService {
       throw error;
     }
   }
+
+  public async deleteUser(userId: string) {
+    try {
+      const user = await User.findByIdAndDelete(userId);
+      if (!user) {
+        throw new Error('User not found');
+      }
+      return { message: 'User deleted successfully' };
+    } catch (error) {
+      throw error;
+    }
+  }
 }
