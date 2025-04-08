@@ -1,9 +1,20 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { User } from '../models/User';
+import { Counter } from '../models/Counter';
 import { RegisterUserDTO, LoginDTO, UpdateUserDTO } from '../interfaces/user.interface';
 
 export class UserService {
+  private async getNextRegistrationNumber(): Promise<string> {
+    const counter = await Counter.findByIdAndUpdate(
+      'registration',
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true }
+    );
+    
+    // Formata o número com zeros à esquerda (ex: 000001)
+    return counter.seq.toString().padStart(6, '0');
+  }
   public async register(userData: RegisterUserDTO) {
     try {
       // Verificar se o email já existe
@@ -16,9 +27,13 @@ export class UserService {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(userData.password, salt);
 
+      // Gerar número de registro
+      const registrationNumber = await this.getNextRegistrationNumber();
+
       // Criar usuário
       const user = await User.create({
         ...userData,
+        registration: registrationNumber,
         password: hashedPassword
       });
 

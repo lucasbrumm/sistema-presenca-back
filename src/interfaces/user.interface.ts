@@ -3,7 +3,7 @@ export interface RegisterUserDTO {
   email: string;
   password: string;
   course: string;
-  registration: string;
+  registration?: string;
   role: string;
 }
 
