@@ -5,6 +5,11 @@ import { Counter } from '../models/Counter';
 import { RegisterUserDTO, LoginDTO, UpdateUserDTO } from '../interfaces/user.interface';
 
 export class UserService {
+  private validateEmail(email: string): boolean {
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    return emailRegex.test(email);
+  }
+
   private async getNextRegistrationNumber(): Promise<string> {
     const counter = await Counter.findByIdAndUpdate(
       'registration',
@@ -17,6 +22,11 @@ export class UserService {
   }
   public async register(userData: RegisterUserDTO) {
     try {
+      // Validar formato do email
+      if (!this.validateEmail(userData.email)) {
+        throw new Error('Invalid email format');
+      }
+
       // Verificar se o email já existe
       const existingUser = await User.findOne({ email: userData.email });
       if (existingUser) {
