@@ -20,8 +20,13 @@ export class UserController {
 
   public login = async (req: Request, res: Response): Promise<Response> => {
     try {
-      const result = await this.userService.login(req.body);
-      return res.json(result);
+      // retornar login com token
+      // const result = await this.userService.login(req.body);
+      // return res.json(result);
+
+      // retornar apenas o token
+      const token = await this.userService.login(req.body);
+      return res.json({ token });
     } catch (error) {
       console.error('Error logging in:', error);
       return res.status(401).json({ error: error instanceof Error ? error.message : 'Invalid credentials' });

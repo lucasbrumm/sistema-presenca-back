@@ -82,9 +82,13 @@ export class UserService {
         { expiresIn: '24h' }
       );
 
+
       // Retornar usuário sem a senha e com o token
-      const { password, ...userWithoutPassword } = user.toObject();
-      return { ...userWithoutPassword, token };
+      // const { password, ...userWithoutPassword } = user.toObject();
+      // return { ...userWithoutPassword, token };
+
+      // Retornar apenas o token
+      return token;
     } catch (error) {
       throw error;
     }
