@@ -84,7 +84,21 @@
 ### Marcar Presença
 - **POST** `/attendance/mark`
 - Marca presença em um evento
-- **Body**: Detalhes da presença
+- **Body**:
+  ```json
+  {
+    "eventId": "string",
+    "userId": "string",
+    "status": "string",
+    "checkInMethod": ["qr", "manual"],
+    "location": {
+      "lat": "number",
+      "lng": "number"
+    },
+    "deviceInfo": "object",
+    "notes": "string (opcional)"
+  }
+  ```
 
 ### Verificar Presença
 - **POST** `/attendance/verify`
@@ -100,6 +114,9 @@
 - **GET** `/attendance/event/:eventId`
 - Obtém todos os registros de presença de um evento
 - **Params**: `eventId` - ID do evento
+- **Query**:
+  - `includeNotes` - (opcional) Incluir notas de presença
+  - `status` - (opcional) Filtrar por status de presença
 
 ### Obter Presenças do Usuário
 - **GET** `/attendance/user/:userId`
@@ -110,6 +127,31 @@
 - **GET** `/attendance/report/:eventId`
 - Gera relatório de presença para um evento
 - **Params**: `eventId` - ID do evento
+- **Query**:
+  - `format` - Formato do relatório (pdf, csv, excel)
+  - `includeNotes` - (opcional) Incluir notas no relatório
+  - `startDate` - (opcional) Data inicial para filtro
+  - `endDate` - (opcional) Data final para filtro
+
+## Relatórios
+
+### Gerar Relatório de Evento
+- **GET** `/reports/event/:eventId`
+- Gera relatório detalhado de um evento
+- **Params**: `eventId` - ID do evento
+- **Query**:
+  - `format` - Formato do relatório (pdf, csv, excel)
+  - `includeNotes` - (opcional) Incluir notas
+
+### Gerar Relatório de Usuário
+- **GET** `/reports/user/:userId`
+- Gera relatório de presenças de um usuário
+- **Params**: `userId` - ID do usuário
+- **Query**:
+  - `format` - Formato do relatório (pdf, csv, excel)
+  - `startDate` - (opcional) Data inicial
+  - `endDate` - (opcional) Data final
+  - `includeNotes` - (opcional) Incluir notas
 
 ## Notificações
 
@@ -142,13 +184,35 @@
 - **POST** `/notifications/event/:eventId/remind`
 - Envia notificações de lembrete para um evento
 - **Params**: `eventId` - ID do evento
+- **Body**:
+  ```json
+  {
+    "message": "string (opcional)",
+    "scheduleTime": "Date (opcional)"
+  }
+  ```
 
 ### Enviar Confirmação de Presença
 - **POST** `/notifications/attendance/confirm`
 - Envia notificação de confirmação de presença
-- **Body**: Detalhes da confirmação
+- **Body**:
+  ```json
+  {
+    "userId": "string",
+    "eventId": "string",
+    "message": "string (opcional)"
+  }
+  ```
 
 ### Enviar Notificação de Atualização de Evento
 - **POST** `/notifications/event/:eventId/update`
 - Envia notificação sobre atualizações do evento
 - **Params**: `eventId` - ID do evento
+- **Body**:
+  ```json
+  {
+    "message": "string",
+    "notifyAll": "boolean (opcional)",
+    "type": "string (opcional) - update, alert, reminder"
+  }
+  ```
