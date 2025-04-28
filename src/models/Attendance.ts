@@ -1,10 +1,21 @@
 import { Schema, model, Document, Types } from 'mongoose';
 import { AttendanceStatus } from '../enums/AttendanceStatus';
+import { CheckInMethod } from '../enums/CheckInMethod';
+
+interface ILocation {
+  lat: number;
+  lng: number;
+}
 
 export interface IAttendance extends Document {
   eventId: Types.ObjectId;
   userId: Types.ObjectId;
   status: AttendanceStatus;
+  checkInMethod: CheckInMethod[];
+  checkInTime: Date;
+  location: ILocation;
+  deviceInfo: Record<string, any>;
+  synced: boolean;
   verificationCode?: string;
   verifiedAt?: Date;
   notes?: string;
@@ -27,6 +38,33 @@ const attendanceSchema = new Schema({
     type: String,
     enum: Object.values(AttendanceStatus),
     required: true,
+  },
+  checkInMethod: [{
+    type: String,
+    enum: Object.values(CheckInMethod),
+    required: true,
+  }],
+  checkInTime: {
+    type: Date,
+    required: true,
+  },
+  location: {
+    lat: {
+      type: Number,
+      required: true,
+    },
+    lng: {
+      type: Number,
+      required: true,
+    },
+  },
+  deviceInfo: {
+    type: Schema.Types.Mixed,
+    required: true,
+  },
+  synced: {
+    type: Boolean,
+    default: false,
   },
   verificationCode: {
     type: String,

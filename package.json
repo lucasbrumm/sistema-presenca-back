@@ -15,12 +15,14 @@
   "dependencies": {
     "@types/cors": "^2.8.17",
     "@types/mongoose": "^5.11.96",
+    "@types/pdfkit": "^0.13.9",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.13.1",
+    "pdfkit": "^0.17.0",
     "qrcode": "^1.5.4"
   },
   "devDependencies": {
