@@ -40,7 +40,7 @@ export class UserService {
       // Gerar token JWT
       const token = jwt.sign(
         { userId: user._id },
-        process.env.JWT_SECRET || 'your-secret-key',
+        process.env.JWT_SECRET || 'f4g4mm0n@2025#s3cur3',
         { expiresIn: '24h' }
       );
 
@@ -68,7 +68,7 @@ export class UserService {
       // Gerar token JWT
       const token = jwt.sign(
         { userId: user._id },
-        process.env.JWT_SECRET || 'your-secret-key',
+        process.env.JWT_SECRET || 'f4g4mm0n@2025#s3cur3',
         { expiresIn: '24h' }
       );
 

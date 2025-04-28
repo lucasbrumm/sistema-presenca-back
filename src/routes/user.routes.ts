@@ -17,7 +17,6 @@ const getUserProfile: RequestHandler = async (req, res) => {
 };
 
 const updateUserProfile: RequestHandler = async (req, res) => {
-  console.log("aq");
   await userController.updateUserProfile(req, res);
 };
 
