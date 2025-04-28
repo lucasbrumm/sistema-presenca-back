@@ -1,6 +1,5 @@
 import { Schema, model, Document, Types } from 'mongoose';
-import { EventType } from '../enums/EventType';
-import { EventCategory } from '../enums/EventCategory';
+import { EventCategory, EventType } from '../enums/EventType';
 import { AttendeeStatus } from '../enums/AttendeeStatus';
 
 interface ILocation {
@@ -62,11 +61,11 @@ const eventSchema = new Schema({
     },
     coordinates: {
       lat: {
-        type: Number,
+        type: String,
         required: true,
       },
       lng: {
-        type: Number,
+        type: String,
         required: true,
       },
     },
