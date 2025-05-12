@@ -40,14 +40,16 @@ const getAttendees: RequestHandler = async (req, res) => {
   await eventController.getAttendees(req, res);
 };
 
-router.post('/events', createEvent);
-router.put('/events/:id', updateEvent);
-router.delete('/events/:id', deleteEvent);
-router.get('/events/:id', getEventById);
-router.get('/events', getAllEvents);
-router.get('/events/creator/:creatorId', getEventsByCreator);
-router.post('/events/:id/register', registerForEvent);
-router.get('/events/:id/qrcode', generateQRCode);
-router.get('/events/:id/attendees', getAttendees);
+// Agora as rotas não incluem /events, pois o prefixo virá do server.ts
+router.post('/', createEvent);
+router.put('/:id', updateEvent);
+router.delete('/:id', deleteEvent);
+router.get('/:id', getEventById);
+router.get('/', getAllEvents);
+router.get('/creator/:creatorId', getEventsByCreator);
+router.post('/:id/register', registerForEvent);
+router.get('/:id/qrcode', generateQRCode);
+router.get('/:id/attendees', getAttendees);
 
 export default router;
+
