@@ -15,7 +15,6 @@ export class EventController {
         ...req.body,
         createdBy: Types.ObjectId.createFromHexString(req.body.createdBy)
       });
-      console.log("q");
       return res.status(201).json(event);
     } catch (error) {
       console.error('Error creating event:', error);
