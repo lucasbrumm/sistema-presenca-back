@@ -29,12 +29,4 @@ router.get('/attendance/report/:eventId', async (req: Request, res: Response) =>
   await attendanceController.generateReport(req, res);
 });
 
-
-
-
-
-
-
-
-
 export default router;
