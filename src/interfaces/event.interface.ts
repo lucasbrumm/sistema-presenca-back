@@ -6,11 +6,17 @@ export interface CreateEventDTO {
   description: string;
   type: EventType;
   category: EventCategory;
-  location: string;
-  startDate: Date;
-  endDate: Date;
-  maxAttendees?: number;
-  createdBy: Types.ObjectId;
+  location: {
+    name: string;
+    coordinates: {
+      lat: string;
+      lng: string;
+    };
+  };
+  startDate: string;
+  endDate: string;
+  maxParticipants: number;
+  createdBy: string;
 }
 
 export interface UpdateEventDTO {
